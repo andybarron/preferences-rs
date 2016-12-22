@@ -1,10 +1,10 @@
 [package]
 name = "preferences"
-version = "0.7.3"
+version = "0.7.4"
 authors = ["Andy Barron <AndrewLBarron@gmail.com>"]
 
 description = "Read and write user-specific application data (in stable Rust)"
-documentation = "https://andybarron.github.io/preferences"
+documentation = "https://docs.rs/preferences"
 repository = "https://github.com/AndyBarron/preferences-rs"
 readme = "README.md"
 keywords = ["preferences", "user", "data", "persistent", "storage"]
