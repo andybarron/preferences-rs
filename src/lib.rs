@@ -318,7 +318,7 @@ pub trait Preferences: Sized {
 fn compute_file_path<S: AsRef<str>>(app: &AppInfo, key: S) -> Result<PathBuf, PreferencesError> {
     let mut path = get_app_dir(DATA_TYPE, app, key.as_ref())?;
     let new_name = match path.file_name() {
-        Some(name) if name.is_empty() => {
+        Some(name) if !name.is_empty() => {
             let mut new_name = OsString::with_capacity(name.len() + PREFS_FILE_EXTENSION.len());
             new_name.push(name);
             new_name.push(PREFS_FILE_EXTENSION);
