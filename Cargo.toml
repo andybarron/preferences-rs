@@ -4,8 +4,8 @@ version = "1.0.0"
 authors = ["Andy Barron <AndrewLBarron@gmail.com>"]
 
 description = "Read and write user-specific application data (in stable Rust)"
-documentation = "https://andybarron.github.io/preferences"
-repository = "https://docs.rs/preferences"
+documentation = "https://docs.rs/preferences"
+repository = "https://github.com/AndyBarron/preferences-rs"
 readme = "README.md"
 keywords = ["preferences", "user", "data", "persistent", "storage"]
 license = "MIT"
