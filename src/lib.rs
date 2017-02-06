@@ -394,4 +394,19 @@ mod tests {
         assert!(load_result.is_ok());
         assert_eq!(load_result.unwrap(), sample);
     }
+    #[test]
+    fn test_multiple_save_load() {
+        let name1 = gen_test_name("multiple-save-load-1");
+        let name2 = gen_test_name("multiple-save-load-2");
+        let save_result1 = 1i32.save(&APP_INFO, &name1);
+        let save_result2 = 2i32.save(&APP_INFO, &name2);
+        assert!(save_result1.is_ok());
+        assert!(save_result2.is_ok());
+        let load_result1 = i32::load(&APP_INFO, &name1);
+        let load_result2 = i32::load(&APP_INFO, &name2);
+        assert!(load_result1.is_ok());
+        assert!(load_result2.is_ok());
+        assert_eq!(load_result1.unwrap(), 1);
+        assert_eq!(load_result2.unwrap(), 2);
+    }
 }
