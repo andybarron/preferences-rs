@@ -384,17 +384,19 @@ mod tests {
     }
     #[test]
     fn test_save_load() {
-        let name1 = gen_test_name("multiple-save-load-1");
-        let name2 = gen_test_name("multiple-save-load-2");
-        let save_result1 = 1i32.save(&APP_INFO, &name1);
-        let save_result2 = 2i32.save(&APP_INFO, &name2);
-        assert!(save_result1.is_ok());
-        assert!(save_result2.is_ok());
-        let load_result1 = i32::load(&APP_INFO, &name1);
-        let load_result2 = i32::load(&APP_INFO, &name2);
-        assert!(load_result1.is_ok());
-        assert!(load_result2.is_ok());
-        assert_eq!(load_result1.unwrap(), 1);
-        assert_eq!(load_result2.unwrap(), 2);
+        let sample_map = gen_sample_prefs();
+        let sample_other: i32 = 4;
+        let name_map = gen_test_name("save-load-map");
+        let name_other = gen_test_name("save-load-other");
+        let save_map_result = sample_map.save(&APP_INFO, &name_map);
+        let save_other_result = sample_other.save(&APP_INFO, &name_other);
+        assert!(save_map_result.is_ok());
+        assert!(save_other_result.is_ok());
+        let load_map_result = PreferencesMap::load(&APP_INFO, &name_map);
+        let load_other_result = i32::load(&APP_INFO, &name_other);
+        assert!(load_map_result.is_ok());
+        assert!(load_other_result.is_ok());
+        assert_eq!(load_map_result.unwrap(), sample_map);
+        assert_eq!(load_other_result.unwrap(), sample_other);
     }
 }
