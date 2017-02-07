@@ -384,18 +384,6 @@ mod tests {
     }
     #[test]
     fn test_save_load() {
-        let name = gen_test_name("save-load");
-        let sample = gen_sample_prefs();
-        let save_result = sample.save(&APP_INFO, &name);
-        println!("Save result: {:?}", save_result);
-        assert!(save_result.is_ok());
-        let load_result = PreferencesMap::load(&APP_INFO, &name);
-        println!("Load result: {:?}", load_result);
-        assert!(load_result.is_ok());
-        assert_eq!(load_result.unwrap(), sample);
-    }
-    #[test]
-    fn test_multiple_save_load() {
         let name1 = gen_test_name("multiple-save-load-1");
         let name2 = gen_test_name("multiple-save-load-2");
         let save_result1 = 1i32.save(&APP_INFO, &name1);
