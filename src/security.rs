@@ -241,3 +241,7 @@ where
         Ok(data)
     }
 }
+
+#[cfg(test)]
+mod tests {
+}

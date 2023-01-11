@@ -1,6 +1,6 @@
 [package]
 name = "preferences"
-version = "2.0.0"
+version = "3.0.0"
 authors = ["Andy Barron <AndrewLBarron@gmail.com>"]
 
 description = "Read and write user-specific application data (in stable Rust)"
