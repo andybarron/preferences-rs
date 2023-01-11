@@ -4,12 +4,13 @@
 //! > **Note:** You need enable the `security` feature
 //!
 //! # Cargo.toml
-//! ```
+//! ```toml
 //! [dependencies]
 //! preferences = { version = "3.0.0", features = ["security"] }
+//! ```
 //!
 //! # Basic example
-//! ```
+//! ```rust
 //! extern crate preferences;
 //! use preferences::{AppInfo, PreferencesMap, security::{SecurityManager, SecurePreferences}};
 //!
@@ -43,7 +44,7 @@
 //! ```
 //!
 //! # Using custom data types
-//! ```
+//! ```rust
 //! #[macro_use]
 //! extern crate serde_derive;
 //! extern crate preferences;
@@ -83,12 +84,12 @@ use std::{
 };
 
 use cocoon::{Cocoon, Creation};
-use app_dirs::{get_app_dir, get_data_root, AppDataType, AppInfo};
+use app_dirs::{get_app_dir, AppInfo};
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{PreferencesError, DATA_TYPE, DEFAULT_PREFS_FILENAME, PREFS_FILE_EXTENSION};
 
-pub use CocoonCipher as Cipher;
+pub use cocoon::CocoonCipher as Cipher;
 
 /// Encryption and Desencryption struct
 pub struct SecurityManager<'a> {
