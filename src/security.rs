@@ -1,3 +1,80 @@
+//! This module allows you to store and retrieve securely encrypted local usage preferences and other
+//! application data in a flexible and platform-appropriate manner.
+//!
+//! > **Note:** You need enable the `security` feature
+//!
+//! # Cargo.toml
+//! ```
+//! [dependencies]
+//! preferences = { version = "3.0.0", features = ["security"] }
+//!
+//! # Basic example
+//! ```
+//! extern crate preferences;
+//! use preferences::{AppInfo, PreferencesMap, security::{SecurityManager, SecurePreferences}};
+//!
+//! const APP_INFO: AppInfo = AppInfo{name: "preferences", author: "Rust language community"};
+//!
+//! fn main() {
+//!
+//!     let manager = SecurityManager::new("My most secure password", None);
+//!
+//!     // Create a new preferences key-value map
+//!     // (Under the hood: HashMap<String, String>)
+//!     let mut faves: PreferencesMap<String> = PreferencesMap::new();
+//!
+//!     // Edit the preferences (std::collections::HashMap)
+//!     faves.insert("color".into(), "blue".into());
+//!     faves.insert("programming language".into(), "Rust".into());
+//!
+//!     // Store the user's preferences
+//!     let prefs_key = "tests/docs/basic-example";
+//!     let save_result = faves.save(&APP_INFO, &manager, prefs_key);
+//!     assert!(save_result.is_ok());
+//!
+//!     // ... Then do some stuff ...
+//!
+//!     // Retrieve the user's preferences
+//!     let load_result = PreferencesMap::<String>::load(&APP_INFO, &manager, prefs_key);
+//!     assert!(load_result.is_ok());
+//!     assert_eq!(load_result.unwrap(), faves);
+//!
+//! }
+//! ```
+//!
+//! # Using custom data types
+//! ```
+//! #[macro_use]
+//! extern crate serde_derive;
+//! extern crate preferences;
+//! use preferences::{AppInfo, security::{SecurityManager, SecurePreferences, Cipher}};
+//!
+//! const APP_INFO: AppInfo = AppInfo{name: "preferences", author: "Rust language community"};
+//!
+//! // Deriving `Serialize` and `Deserialize` on a struct/enum automatically implements
+//! // the `Preferences` trait.
+//! #[derive(Serialize, Deserialize, PartialEq, Debug)]
+//! struct PlayerData {
+//!     level: u32,
+//!     health: f32,
+//! }
+//!
+//! fn main() {
+//!
+//!     let player = PlayerData{level: 2, health: 0.75};
+//!
+//!     let manager = SecurityManager::new("My most secure password", Some(Cipher::Aes256Gcm));
+//!     let prefs_key = "tests/docs/custom-types";
+//!     let save_result = player.save(&APP_INFO, &manager, prefs_key);
+//!     assert!(save_result.is_ok());
+//!
+//!     // Method `load` is from trait `Preferences`.
+//!     let load_result = PlayerData::load(&APP_INFO, &manager, prefs_key);
+//!     assert!(load_result.is_ok());
+//!     assert_eq!(load_result.unwrap(), player);
+//!
+//! }
+//! ```
 use std::{
     ffi::OsString,
     fs::{create_dir_all, File},
@@ -5,18 +82,25 @@ use std::{
     path::PathBuf,
 };
 
-use cocoon::{Cocoon, CocoonCipher, Creation};
+use cocoon::{Cocoon, Creation};
 use app_dirs::{get_app_dir, get_data_root, AppDataType, AppInfo};
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{PreferencesError, DATA_TYPE, DEFAULT_PREFS_FILENAME, PREFS_FILE_EXTENSION};
 
+pub use CocoonCipher as Cipher;
+
+/// Encryption and Desencryption struct
 pub struct SecurityManager<'a> {
     core: Cocoon<'a, Creation>,
 }
 
 impl<'a> SecurityManager<'a> {
-    pub fn new(password: &'a str, cipher: Option<CocoonCipher>) -> Self {
+    /// Create an instance using the password and defining the type of cipher.
+    ///
+    /// - password: It is the key that will allow encrypting and decrypting the information.
+    /// - cipher: Define the type of encryption to use.
+    pub fn new(password: &'a str, cipher: Option<Cipher>) -> Self {
         let mut core = Cocoon::new(password.as_bytes());
         if let Some(cipher) = cipher {
             core = core.with_cipher(cipher);
@@ -42,11 +126,13 @@ impl<'a> SecurityManager<'a> {
         Err(res.unwrap_err())
     }
 
+    /// Encrypts the text passed as a `value` and returns a result with the text already encrypted.
     pub fn encrypt_str(&self, value: &str) -> Result<String, cocoon::Error> {
         let bytes = self.encrypt(value).unwrap();
         Ok(String::from_utf8(bytes).unwrap())
     }
 
+    /// Decrypts the text passed as a `value` and returns a result with the text already decrypted.
     pub fn dencrypt_str(&self, value: &str) -> Result<String, cocoon::Error> {
         let bytes = self.decrypt(value).unwrap();
         Ok(String::from_utf8(bytes).unwrap())
