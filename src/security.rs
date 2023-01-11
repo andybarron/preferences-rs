@@ -232,11 +232,11 @@ where
     }
     fn save_to<W: Write>(&self, manager: &SecurityManager, writer: &mut W) -> Result<(), PreferencesError> {
         let str_raw = serde_json::to_string(self).unwrap();
-        manager.to_writer(&str_raw, writer).map_err(PreferencesError::Security).unwrap();
+        manager.to_writer(&str_raw, writer).unwrap();
         Ok(())
     }
     fn load_from<R: Read>(manager: &SecurityManager, reader: &mut R) -> Result<Self, PreferencesError> {
-        let decrypt_str = manager.from_reader(reader).map_err(PreferencesError::Security).unwrap();
+        let decrypt_str = manager.from_reader(reader).unwrap();
         let data = serde_json::from_str(&decrypt_str).unwrap();
         Ok(data)
     }
@@ -244,4 +244,45 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::{AppInfo, PreferencesMap};
+    use security::{SecurePreferences, SecurityManager};
+
+    const APP_INFO: AppInfo = AppInfo {
+        name: "preferences",
+        author: "Rust language community",
+    };
+
+    const TEST_PREFIX: &'static str = "tests/module";
+
+    fn gen_test_name(name: &str) -> String {
+        TEST_PREFIX.to_owned() + "/" + name
+    }
+
+    fn gen_sample_prefs() -> PreferencesMap<String> {
+        let mut prefs = PreferencesMap::new();
+        prefs.insert("foo".into(), "bar".into());
+        prefs.insert("age".into(), "23".into());
+        prefs.insert("PI".into(), "3.14".into());
+        prefs.insert("offset".into(), "-9".into());
+        prefs
+    }
+
+    #[test]
+    fn test_save_load() {
+        let manager = SecurityManager::new("My most secure password", None);
+        let sample_map = gen_sample_prefs();
+        let sample_other: i32 = 4;
+        let name_map = gen_test_name("save-load-map");
+        let name_other = gen_test_name("save-load-other");
+        let save_map_result = sample_map.save(&APP_INFO, &manager, &name_map);
+        let save_other_result = sample_other.save(&APP_INFO, &manager, &name_other);
+        assert!(save_map_result.is_ok());
+        assert!(save_other_result.is_ok());
+        let load_map_result = PreferencesMap::load(&APP_INFO, &manager, &name_map);
+        let load_other_result = i32::load(&APP_INFO, &manager, &name_other);
+        assert!(load_map_result.is_ok());
+        assert!(load_other_result.is_ok());
+        assert_eq!(load_map_result.unwrap(), sample_map);
+        assert_eq!(load_other_result.unwrap(), sample_other);
+    }
 }

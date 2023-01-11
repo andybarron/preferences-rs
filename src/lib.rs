@@ -210,9 +210,6 @@ pub type PreferencesMap<T = String> = HashMap<String, T>;
 /// Error type representing the errors that can occur when saving or loading user data.
 #[derive(Debug)]
 pub enum PreferencesError {
-    /// An error occurred during Encrypt or Decrypt file or text.
-    #[cfg(feature = "security")]
-    Security(cocoon::Error),
     /// An error occurred during JSON serialization or deserialization.
     Json(serde_json::Error),
     /// An error occurred during preferences file I/O.
@@ -236,8 +233,6 @@ impl std::error::Error for PreferencesError {
     fn description(&self) -> &str {
         use PreferencesError::*;
         match *self {
-            #[cfg(feature = "security")]
-            Security(ref e) => &format!("{e:?}"),
             Json(ref e) => e.description(),
             Io(ref e) => e.description(),
             Directory(ref e) => e.description(),
@@ -246,8 +241,6 @@ impl std::error::Error for PreferencesError {
     fn cause(&self) -> Option<&std::error::Error> {
         use PreferencesError::*;
         Some(match *self {
-            #[cfg(feature = "security")]
-            Security(ref e) => &format!("{e:?}"),
             Json(ref e) => e,
             Io(ref e) => e,
             Directory(ref e) => e,
