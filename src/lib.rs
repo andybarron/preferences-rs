@@ -171,17 +171,23 @@ extern crate app_dirs;
 extern crate serde;
 extern crate serde_json;
 
+#[cfg(feature = "security")]
+extern crate cocoon;
+
+use app_dirs::{get_app_dir, get_data_root, AppDataType};
 pub use app_dirs::{AppDirsError, AppInfo};
-use app_dirs::{AppDataType, get_data_root, get_app_dir};
-use serde::Serialize;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fmt;
-use std::fs::{File, create_dir_all};
+use std::fs::{create_dir_all, File};
 use std::io::{self, ErrorKind, Read, Write};
 use std::path::PathBuf;
 use std::string::FromUtf8Error;
+
+#[cfg(feature = "security")]
+pub mod security;
 
 const DATA_TYPE: AppDataType = AppDataType::UserConfig;
 static PREFS_FILE_EXTENSION: &'static str = ".prefs.json";
@@ -332,10 +338,12 @@ fn compute_file_path<S: AsRef<str>>(app: &AppInfo, key: S) -> Result<PathBuf, Pr
 }
 
 impl<T> Preferences for T
-    where T: Serialize + DeserializeOwned + Sized
+where
+    T: Serialize + DeserializeOwned + Sized,
 {
     fn save<S>(&self, app: &AppInfo, key: S) -> Result<(), PreferencesError>
-        where S: AsRef<str>
+    where
+        S: AsRef<str>,
     {
         let path = compute_file_path(app, key.as_ref())?;
         path.parent().map(create_dir_all);
