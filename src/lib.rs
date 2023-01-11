@@ -247,7 +247,7 @@ impl std::error::Error for PreferencesError {
         use PreferencesError::*;
         Some(match *self {
             #[cfg(feature = "security")]
-            Security(ref e) => e,
+            Security(ref e) => &format!("{e:?}"),
             Json(ref e) => e,
             Io(ref e) => e,
             Directory(ref e) => e,
