@@ -10,8 +10,13 @@ readme = "README.md"
 keywords = ["preferences", "user", "data", "persistent", "storage"]
 license = "MIT"
 
+[features]
+default = []
+security = ["cocoon"]
+
 [dependencies]
 app_dirs = "^1.1.1"
+cocoon = { version = "0.3.2", optional = true }
 serde = "^1.0.0"
 serde_json = "^1.0.0"
 

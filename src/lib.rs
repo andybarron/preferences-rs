@@ -171,17 +171,23 @@ extern crate app_dirs;
 extern crate serde;
 extern crate serde_json;
 
+#[cfg(feature = "security")]
+extern crate cocoon;
+
+use app_dirs::{get_app_dir, get_data_root, AppDataType};
 pub use app_dirs::{AppDirsError, AppInfo};
-use app_dirs::{AppDataType, get_data_root, get_app_dir};
-use serde::Serialize;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fmt;
-use std::fs::{File, create_dir_all};
+use std::fs::{create_dir_all, File};
 use std::io::{self, ErrorKind, Read, Write};
 use std::path::PathBuf;
 use std::string::FromUtf8Error;
+
+#[cfg(feature = "security")]
+pub mod security;
 
 const DATA_TYPE: AppDataType = AppDataType::UserConfig;
 static PREFS_FILE_EXTENSION: &'static str = ".prefs.json";
@@ -204,6 +210,9 @@ pub type PreferencesMap<T = String> = HashMap<String, T>;
 /// Error type representing the errors that can occur when saving or loading user data.
 #[derive(Debug)]
 pub enum PreferencesError {
+    /// An error occurred during Encrypt or Decrypt file or text.
+    #[cfg(feature = "security")]
+    Security(cocoon::Error),
     /// An error occurred during JSON serialization or deserialization.
     Json(serde_json::Error),
     /// An error occurred during preferences file I/O.
@@ -227,6 +236,8 @@ impl std::error::Error for PreferencesError {
     fn description(&self) -> &str {
         use PreferencesError::*;
         match *self {
+            #[cfg(feature = "security")]
+            Security(ref e) => &format!("{e:?}"),
             Json(ref e) => e.description(),
             Io(ref e) => e.description(),
             Directory(ref e) => e.description(),
@@ -235,6 +246,8 @@ impl std::error::Error for PreferencesError {
     fn cause(&self) -> Option<&std::error::Error> {
         use PreferencesError::*;
         Some(match *self {
+            #[cfg(feature = "security")]
+            Security(ref e) => e,
             Json(ref e) => e,
             Io(ref e) => e,
             Directory(ref e) => e,
@@ -332,10 +345,12 @@ fn compute_file_path<S: AsRef<str>>(app: &AppInfo, key: S) -> Result<PathBuf, Pr
 }
 
 impl<T> Preferences for T
-    where T: Serialize + DeserializeOwned + Sized
+where
+    T: Serialize + DeserializeOwned + Sized,
 {
     fn save<S>(&self, app: &AppInfo, key: S) -> Result<(), PreferencesError>
-        where S: AsRef<str>
+    where
+        S: AsRef<str>,
     {
         let path = compute_file_path(app, key.as_ref())?;
         path.parent().map(create_dir_all);
