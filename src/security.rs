@@ -139,12 +139,12 @@ impl<'a> SecurityManager<'a> {
         Ok(String::from_utf8(bytes).unwrap())
     }
 
-    pub(super) fn to_file<W: Write>(&self, data: &str, file: &mut W) ->  Result<(), cocoon::Error> {
+    pub(super) fn to_writer<W: Write>(&self, data: &str, file: &mut W) ->  Result<(), cocoon::Error> {
         let data = data.to_owned().into_bytes();
         self.core.dump(data, file)
     }
 
-    pub(super) fn from_file<R: Read>(&self, file: &mut R) -> Result<String, cocoon::Error> {
+    pub(super) fn from_reader<R: Read>(&self, file: &mut R) -> Result<String, cocoon::Error> {
         let bytes = self.core.parse(file).unwrap();
         Ok(String::from_utf8(bytes).unwrap())
     }
@@ -232,11 +232,11 @@ where
     }
     fn save_to<W: Write>(&self, manager: &SecurityManager, writer: &mut W) -> Result<(), PreferencesError> {
         let str_raw = serde_json::to_string(self).unwrap();
-        manager.to_file(&str_raw, writer).map_err(PreferencesError::Security).unwrap();
+        manager.to_writer(&str_raw, writer).map_err(PreferencesError::Security).unwrap();
         Ok(())
     }
     fn load_from<R: Read>(manager: &SecurityManager, reader: &mut R) -> Result<Self, PreferencesError> {
-        let decrypt_str = manager.from_file(reader).map_err(PreferencesError::Security).unwrap();
+        let decrypt_str = manager.from_reader(reader).map_err(PreferencesError::Security).unwrap();
         let data = serde_json::from_str(&decrypt_str).unwrap();
         Ok(data)
     }
