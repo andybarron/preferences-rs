@@ -167,12 +167,12 @@
 
 #![warn(missing_docs)]
 
-extern crate app_dirs;
+extern crate app_dirs2;
 extern crate serde;
 extern crate serde_json;
 
-pub use app_dirs::{AppDirsError, AppInfo};
-use app_dirs::{AppDataType, get_data_root, get_app_dir};
+pub use app_dirs2::{AppDirsError, AppInfo};
+use app_dirs2::{AppDataType, get_data_root, get_app_dir};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
@@ -232,7 +232,7 @@ impl std::error::Error for PreferencesError {
             Directory(ref e) => e.description(),
         }
     }
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         use PreferencesError::*;
         Some(match *self {
             Json(ref e) => e,
