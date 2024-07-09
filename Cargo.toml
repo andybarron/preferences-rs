@@ -8,7 +8,7 @@ documentation = "https://docs.rs/preferences"
 repository = "https://github.com/AndyBarron/preferences-rs"
 readme = "README.md"
 keywords = ["preferences", "user", "data", "persistent", "storage"]
-license = "MIT"
+license = "MIT-0"
 
 [dependencies]
 app_dirs = { package = "app_dirs2", version = "2.5" }
