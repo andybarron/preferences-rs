@@ -18,7 +18,9 @@ jobs:
         with:
           components: clippy, rustfmt
           toolchain: ${{ matrix.rust }}
-      - run: cargo install cargo-tarpaulin cargo-msrv
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-msrv,cargo-tarpaulin
       - run: ./scripts/ci/format
       - run: ./scripts/ci/check
       - run: ./scripts/ci/test
