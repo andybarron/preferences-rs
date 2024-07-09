@@ -2,23 +2,22 @@
 name = "preferences"
 version = "3.0.0"
 authors = ["Andy Barron <AndrewLBarron@gmail.com>"]
+edition = "2021"
+rust-version = "1.61.0"
 
 description = "Read and write user-specific application data (in stable Rust)"
 documentation = "https://docs.rs/preferences"
 repository = "https://github.com/AndyBarron/preferences-rs"
 readme = "README.md"
 keywords = ["preferences", "user", "data", "persistent", "storage"]
-license = "MIT"
+license = "MIT-0"
 
 [features]
 default = []
 security = ["cocoon"]
 
 [dependencies]
-app_dirs = "^1.1.1"
+app_dirs = { package = "app_dirs2", version = "2.5" }
 cocoon = { version = "0.3.2", optional = true }
-serde = "^1.0.0"
+serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = "^1.0.0"
-
-[dev-dependencies]
-serde_derive = "^1.0.0"

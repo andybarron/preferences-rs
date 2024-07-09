@@ -8,8 +8,7 @@
 //! this crate is more flexible. *Any* struct or enum that implements
 //! [`serde`][serde-api]'s `Serialize` and `Deserialize`
 //! traits can be stored and retrieved as user data. Implementing those traits is
-//! trivial; just include the crate `serde_derive` (don't forget `#[macro_use]`!) and add
-//! `#[derive(Serialize, Deserialize)` to your struct definition. (See examples below.)
+//! trivial with the `#[derive(Serialize, Deserialize)]` attribute.
 //!
 //! # Usage
 //! For convenience, the type [`PreferencesMap<T>`](type.PreferencesMap.html) is provided. (It's
@@ -53,10 +52,10 @@
 //!
 //! # Using custom data types
 //! ```
-//! #[macro_use]
-//! extern crate serde_derive;
 //! extern crate preferences;
+//! extern crate serde;
 //! use preferences::{AppInfo, Preferences};
+//! use serde::{Serialize, Deserialize};
 //!
 //! const APP_INFO: AppInfo = AppInfo{name: "preferences", author: "Rust language community"};
 //!
@@ -86,10 +85,10 @@
 //!
 //! # Using custom data types with `PreferencesMap`
 //! ```
-//! #[macro_use]
-//! extern crate serde_derive;
 //! extern crate preferences;
+//! extern crate serde;
 //! use preferences::{AppInfo, PreferencesMap, Preferences};
+//! use serde::{Serialize, Deserialize};
 //!
 //! const APP_INFO: AppInfo = AppInfo{name: "preferences", author: "Rust language community"};
 //!
@@ -115,10 +114,10 @@
 //!
 //! # Using custom data types with serializable containers
 //! ```
-//! #[macro_use]
-//! extern crate serde_derive;
 //! extern crate preferences;
+//! extern crate serde;
 //! use preferences::{AppInfo, Preferences};
+//! use serde::{Serialize, Deserialize};
 //!
 //! const APP_INFO: AppInfo = AppInfo{name: "preferences", author: "Rust language community"};
 //!
@@ -162,7 +161,7 @@
 //! whatever location and format that you wanted. But that would defeat the purpose of this
 //! library. &#128522;
 //!
-//! [hashmap-api]: https://doc.rust-lang.org/nightly/std/collections/struct.HashMap.html
+//! [hashmap-api]: https://doc.rust-lang.org/std/collections/struct.HashMap.html
 //! [serde-api]: https://crates.io/crates/serde
 
 #![warn(missing_docs)]
@@ -204,7 +203,7 @@ static DEFAULT_PREFS_FILENAME: &'static str = "prefs.json";
 /// `PreferencesMap<T>` as long as `T` is serializable. (See the
 /// [module documentation](index.html) for examples and more details.)
 ///
-/// [hashmap-api]: https://doc.rust-lang.org/nightly/std/collections/struct.HashMap.html
+/// [hashmap-api]: https://doc.rust-lang.org/std/collections/struct.HashMap.html
 pub type PreferencesMap<T = String> = HashMap<String, T>;
 
 /// Error type representing the errors that can occur when saving or loading user data.
@@ -230,15 +229,7 @@ impl fmt::Display for PreferencesError {
 }
 
 impl std::error::Error for PreferencesError {
-    fn description(&self) -> &str {
-        use PreferencesError::*;
-        match *self {
-            Json(ref e) => e.description(),
-            Io(ref e) => e.description(),
-            Directory(ref e) => e.description(),
-        }
-    }
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         use PreferencesError::*;
         Some(match *self {
             Json(ref e) => e,
