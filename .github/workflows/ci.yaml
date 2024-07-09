@@ -15,9 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        if: ${{ matrix.rust == 'stable' }}
+        with:
+          toolchain: "1.61.0" # TODO: Pull this from Cargo.toml?
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: clippy, rustfmt
           toolchain: ${{ matrix.rust }}
+      - run: cargo --version # TODO: Remove
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-msrv,cargo-tarpaulin
