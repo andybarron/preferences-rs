@@ -3,7 +3,7 @@ name = "preferences"
 version = "2.0.0"
 authors = ["Andy Barron <AndrewLBarron@gmail.com>"]
 edition = "2021"
-rust-version = "1.61.0"
+rust-version = "1.61.0" # syn
 
 description = "Read and write user-specific application data (in stable Rust)"
 documentation = "https://docs.rs/preferences"
