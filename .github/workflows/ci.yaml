@@ -1,111 +1,31 @@
-name: CI
+name: "Continuous integration"
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
-jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust:
-          - stable
-          - beta
-          - nightly
-          - 1.45.0
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.rust }}
-          profile: minimal
-          components: clippy
-          override: true
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v1
-      - name: Install cargo-make
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-make
-      - name: Build
-        if: ${{ matrix.rust != 'stable' }}
-        uses: actions-rs/cargo@v1
-        with:
-          command: make
-          args: ci-build
-      - name: Build and lint
-        if: ${{ matrix.rust == 'stable' }}
-        uses: actions-rs/cargo@v1
-        with:
-          command: make
-          args: ci-lint
-  format:
-    name: Format
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          components: rustfmt
-          override: true
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v1
-      - name: Install cargo-make
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-make
-      - name: Check format
-        uses: actions-rs/cargo@v1
-        with:
-          command: make
-          args: ci-format
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust:
-          - stable
-          - beta
-          - nightly
-          - 1.45.0
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.rust }}
-          profile: minimal
-          components: ""
-          override: true
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v1
-      - name: Install cargo-make
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-make
-      - name: Run tests and generate coverage report
-        uses: actions-rs/cargo@v1
-        with:
-          command: make
-          args: ci-test
-      - name: Upload to codecov.io
-        if: ${{ matrix.rust == 'stable' }}
-        uses: codecov/codecov-action@v1
-        with:
-          fail_ci_if_error: true
 
+jobs:
+  ci:
+    name: CI checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - beta
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy, rustfmt
+          toolchain: ${{ matrix.rust }}
+      - run: cargo install cargo-tarpaulin cargo-msrv
+      - run: ./scripts/ci/format
+      - run: ./scripts/ci/check
+      - run: ./scripts/ci/test
+      - run: cargo msrv verify
+        if: ${{ matrix.rust == 'stable' }}
+      - uses: coverallsapp/github-action@v2
+        if: ${{ matrix.rust == 'stable' }}
+        with:
+          file: lcov.info
+          format: lcov
