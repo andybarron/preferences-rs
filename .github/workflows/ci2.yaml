@@ -1,0 +1,24 @@
+name: "Continuous integration"
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    name: CI checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - beta
+          - nightly
+          - 1.61.0 # TODO: get this from Cargo.toml automatically?
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo install cargo-binstall
+      - run: cargo binstall just cargo-tarpaulin
+      - run: just format-ci
+      - run: just check-ci
+      - run: just test-ci

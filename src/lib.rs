@@ -1,3 +1,5 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::cargo)]
+#![allow(clippy::enum_glob_use)]
 //! *Read and write user-specific application data*
 //!
 //! This crate allows Rust developers to store and retrieve user-local preferences and other
@@ -170,21 +172,21 @@ extern crate app_dirs;
 extern crate serde;
 extern crate serde_json;
 
+use app_dirs::{get_app_dir, get_data_root, AppDataType};
 pub use app_dirs::{AppDirsError, AppInfo};
-use app_dirs::{AppDataType, get_data_root, get_app_dir};
-use serde::Serialize;
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fmt;
-use std::fs::{File, create_dir_all};
+use std::fs::{create_dir_all, File};
 use std::io::{self, ErrorKind, Read, Write};
 use std::path::PathBuf;
 use std::string::FromUtf8Error;
 
 const DATA_TYPE: AppDataType = AppDataType::UserConfig;
-static PREFS_FILE_EXTENSION: &'static str = ".prefs.json";
-static DEFAULT_PREFS_FILENAME: &'static str = "prefs.json";
+static PREFS_FILE_EXTENSION: &str = ".prefs.json";
+static DEFAULT_PREFS_FILENAME: &str = "prefs.json";
 
 /// Generic key-value store for user data.
 ///
@@ -235,7 +237,7 @@ impl std::error::Error for PreferencesError {
 
 impl From<serde_json::Error> for PreferencesError {
     fn from(e: serde_json::Error) -> Self {
-        PreferencesError::Json(e)
+        Self::Json(e)
     }
 }
 
@@ -244,19 +246,19 @@ impl From<FromUtf8Error> for PreferencesError {
         let kind = ErrorKind::InvalidData;
         let msg = "Preferences file contained invalid UTF-8";
         let err = io::Error::new(kind, msg);
-        PreferencesError::Io(err)
+        Self::Io(err)
     }
 }
 
 impl From<std::io::Error> for PreferencesError {
     fn from(e: std::io::Error) -> Self {
-        PreferencesError::Io(e)
+        Self::Io(e)
     }
 }
 
 impl From<AppDirsError> for PreferencesError {
     fn from(e: AppDirsError) -> Self {
-        PreferencesError::Directory(e)
+        Self::Directory(e)
     }
 }
 
@@ -289,7 +291,7 @@ pub trait Preferences: Sized {
     /// Saves the current state of this object. Implementation is platform-dependent, but the data
     /// will be local to the active user.
     ///
-    /// # Failures
+    /// # Errors
     /// If a serialization or file I/O error (e.g. permission denied) occurs.
     fn save<S: AsRef<str>>(&self, app: &AppInfo, key: S) -> Result<(), PreferencesError>;
     /// Loads this object's state from previously saved user data with the same `key`. This is
@@ -297,13 +299,19 @@ pub trait Preferences: Sized {
     /// data. Thus, it is recommended that you call this method immediately after instantiating
     /// the preferences object.
     ///
-    /// # Failures
+    /// # Errors
     /// If a deserialization or file I/O error (e.g. permission denied) occurs, or if no user data
     /// exists at that `path`.
     fn load<S: AsRef<str>>(app: &AppInfo, key: S) -> Result<Self, PreferencesError>;
     /// Same as `save`, but writes the serialized preferences to an arbitrary writer.
+    ///
+    /// # Errors
+    /// If a write or serialization error occurs.
     fn save_to<W: Write>(&self, writer: &mut W) -> Result<(), PreferencesError>;
     /// Same as `load`, but reads the serialized preferences from an arbitrary writer.
+    ///
+    /// # Errors
+    /// If a read or deserialization error occurs.
     fn load_from<R: Read>(reader: &mut R) -> Result<Self, PreferencesError>;
 }
 
@@ -323,10 +331,12 @@ fn compute_file_path<S: AsRef<str>>(app: &AppInfo, key: S) -> Result<PathBuf, Pr
 }
 
 impl<T> Preferences for T
-    where T: Serialize + DeserializeOwned + Sized
+where
+    T: Serialize + DeserializeOwned + Sized,
 {
     fn save<S>(&self, app: &AppInfo, key: S) -> Result<(), PreferencesError>
-        where S: AsRef<str>
+    where
+        S: AsRef<str>,
     {
         let path = compute_file_path(app, key.as_ref())?;
         path.parent().map(create_dir_all);
@@ -351,18 +361,19 @@ impl<T> Preferences for T
 /// This makes no guarantees that the specified directory path actually *exists* (though you can
 /// easily use `std::fs::create_dir_all(..)`). Returns `None` if the directory cannot be determined
 /// or is not available on the current platform.
+#[must_use]
 pub fn prefs_base_dir() -> Option<PathBuf> {
     get_data_root(AppDataType::UserConfig).ok()
 }
 
 #[cfg(test)]
 mod tests {
-    use {AppInfo, Preferences, PreferencesMap};
+    use super::{AppInfo, Preferences, PreferencesMap};
     const APP_INFO: AppInfo = AppInfo {
         name: "preferences",
         author: "Rust language community",
     };
-    const TEST_PREFIX: &'static str = "tests/module";
+    const TEST_PREFIX: &str = "tests/module";
     fn gen_test_name(name: &str) -> String {
         TEST_PREFIX.to_owned() + "/" + name
     }

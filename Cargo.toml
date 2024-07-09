@@ -10,6 +10,7 @@ documentation = "https://docs.rs/preferences"
 repository = "https://github.com/AndyBarron/preferences-rs"
 readme = "README.md"
 keywords = ["preferences", "user", "data", "persistent", "storage"]
+categories = ["configuration"]
 license = "MIT-0"
 
 [dependencies]
