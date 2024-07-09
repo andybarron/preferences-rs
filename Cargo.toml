@@ -2,6 +2,8 @@
 name = "preferences"
 version = "2.0.0"
 authors = ["Andy Barron <AndrewLBarron@gmail.com>"]
+edition = "2021"
+rust-version = "1.61.0"
 
 description = "Read and write user-specific application data (in stable Rust)"
 documentation = "https://docs.rs/preferences"
@@ -12,8 +14,5 @@ license = "MIT-0"
 
 [dependencies]
 app_dirs = { package = "app_dirs2", version = "2.5" }
-serde = "^1.0.0"
+serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = "^1.0.0"
-
-[dev-dependencies]
-serde_derive = "^1.0.0"
