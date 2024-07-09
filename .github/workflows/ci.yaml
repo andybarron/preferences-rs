@@ -22,7 +22,6 @@ jobs:
         with:
           components: clippy, rustfmt
           toolchain: ${{ matrix.rust }}
-      - run: cargo --version # TODO: Remove
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-msrv,cargo-tarpaulin
