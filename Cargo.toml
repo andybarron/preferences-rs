@@ -1,15 +1,16 @@
 [package]
 name = "preferences"
-version = "3.0.0"
+version = "2.0.1-dev.0"
 authors = ["Andy Barron <AndrewLBarron@gmail.com>"]
 edition = "2021"
-rust-version = "1.61.0"
+rust-version = "1.61.0" # syn
 
 description = "Read and write user-specific application data (in stable Rust)"
 documentation = "https://docs.rs/preferences"
 repository = "https://github.com/AndyBarron/preferences-rs"
 readme = "README.md"
 keywords = ["preferences", "user", "data", "persistent", "storage"]
+categories = ["config"]
 license = "MIT-0"
 
 [features]
