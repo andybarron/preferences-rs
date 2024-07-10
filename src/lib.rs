@@ -172,6 +172,9 @@ extern crate app_dirs;
 extern crate serde;
 extern crate serde_json;
 
+#[cfg(feature = "security")]
+extern crate cocoon;
+
 use app_dirs::{get_app_dir, get_data_root, AppDataType};
 pub use app_dirs::{AppDirsError, AppInfo};
 use serde::de::DeserializeOwned;
@@ -183,6 +186,9 @@ use std::fs::{create_dir_all, File};
 use std::io::{self, ErrorKind, Read, Write};
 use std::path::PathBuf;
 use std::string::FromUtf8Error;
+
+#[cfg(feature = "security")]
+pub mod security;
 
 const DATA_TYPE: AppDataType = AppDataType::UserConfig;
 static PREFS_FILE_EXTENSION: &str = ".prefs.json";

@@ -13,7 +13,12 @@ keywords = ["preferences", "user", "data", "persistent", "storage"]
 categories = ["config"]
 license = "MIT-0"
 
+[features]
+default = []
+security = ["cocoon"]
+
 [dependencies]
 app_dirs = { package = "app_dirs2", version = "2.5" }
+cocoon = { version = "0.3.2", optional = true }
 serde = { version = "^1.0.0", features = ["derive"] }
 serde_json = "^1.0.0"
